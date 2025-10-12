@@ -1,0 +1,43 @@
+.dash{display:grid;gap:14px;padding:16px 18px}
+.grid-3{display:grid;grid-template-columns:2fr 1.3fr 1.5fr;gap:14px}
+.panel{border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02);padding:12px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.head h3{font-size:14px;font-weight:800}
+.link{font-size:12px;opacity:.8;cursor:pointer}
+
+.match{display:grid;gap:10px}
+.logos{display:flex;align-items:center;justify-content:center;gap:16px}
+.badge{display:flex;gap:8px;align-items:center}
+.badge img{width:28px;height:28px;border-radius:8px;object-fit:cover}
+.vs{font-weight:800;opacity:.85}
+.center{text-align:center}
+
+.stats{display:grid;gap:8px}
+.stats li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+
+.spark{width:100%;height:auto}
+.spark-line{fill:none;stroke:#ff63b5;stroke-width:2}
+.spark-area{fill:rgba(255,99,181,.15)}
+.money-line{display:flex;justify-content:space-between;margin-top:6px}
+.muted{opacity:.7}
+
+.table-wrap{max-height:260px;overflow:auto;border-radius:10px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
+.form-dots{display:flex;gap:4px}
+.form-dots .dot{width:10px;height:10px;border-radius:999px;display:inline-block;opacity:.9}
+.form-dots .w{background:#4cd17b}.form-dots .d{background:#ffd36e}.form-dots .l{background:#ff6e6e}
+
+.player-stats{display:grid;gap:6px}
+.player-stats li{display:grid;grid-template-columns:60px 1fr 80px 80px 80px;gap:8px;align-items:center;padding:6px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02)}
+.player-stats .role{font-weight:800;opacity:.85}
+.player-stats .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player-stats .metric{justify-self:end;opacity:.9}
+
+.fixtures{display:grid;gap:8px}
+.fixtures li{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02)}
+.res-dot{font-size:18px;line-height:0}
+.res-dot.w{color:#4cd17b}.res-dot.d{color:#ffd36e}.res-dot.l{color:#ff6e6e}.res-dot.next{color:#9aa3b2}
+
+/* Responsive */
+@media (max-width:1280px){.grid-3{grid-template-columns:1fr}}

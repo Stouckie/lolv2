@@ -1,0 +1,22 @@
+.squad-root { padding: 16px 18px; display: grid; gap: 14px; }
+.squad-head { display: flex; align-items: baseline; justify-content: space-between; }
+.roles-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.role-card { border: 1px solid rgba(255,255,255,.06); border-radius: 14px; background: rgba(255,255,255,.02); padding: 10px; display: grid; gap: 10px; }
+.role-head { display: flex; align-items: baseline; justify-content: space-between; }
+.role-head .rname { font-weight: 800; } .role-head .rsub { font-size: 12px; opacity: .7; }
+
+.plist { display: grid; gap: 6px; }
+.prow { display: grid; grid-template-columns: 1.2fr .6fr .8fr; align-items: center; gap: 8px; padding: 8px;
+  border: 1px solid rgba(255,255,255,.06); border-radius: 10px; background: rgba(255,255,255,.02); }
+.prow.starter { border-color: rgba(170,255,170,.35); background: rgba(80,190,120,.08); }
+.prow-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pname { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptag { font-size: 12px; }
+.prow-mid { display: flex; gap: 8px; justify-content: center; opacity: .9; font-variant-numeric: tabular-nums; }
+.prow-right { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+.pill { padding: 2px 6px; border-radius: 8px; font-size: 12px; background: rgba(255,255,255,.06); }
+.pill.g { background: rgba(70,200,120,.28); } .pill.y { background: rgba(240,210,90,.28); } .pill.r { background: rgba(240,120,120,.28); }
+.wage { font-size: 12px; }
+.squad-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn { padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: #e8ebf3; cursor: pointer; }
+@media (max-width: 1280px) { .roles-grid { grid-template-columns: 1fr; } }
