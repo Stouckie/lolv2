@@ -1,0 +1,16 @@
+{
+  "name": "lol-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.12.1",
+  "scripts": {
+    "build:core": "pnpm --filter lol-core run build",
+    "build:ui": "pnpm --filter lol-ui run build",
+    "build": "pnpm run build:core && pnpm run build:ui",
+    "desktop:dev": "pnpm --filter desktop run dev",
+    "desktop:build": "pnpm --filter desktop run build",
+    "typecheck": "pnpm --filter lol-core exec tsc -p tsconfig.json --noEmit && pnpm --filter lol-ui exec tsc -b",
+    "lint": "pnpm --filter lol-ui run lint",
+    "test": "pnpm --filter lol-core run test"
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import "../../../styles/staff.css";
 
 // ⬇️ core: types + générateur staff-only
@@ -187,7 +187,7 @@ export default function StaffPage({
    Card
 ========================================================= */
 
-function StaffCard({ data }: { data: StaffMember }) {
+const StaffCard = memo(function StaffCard({ data }: { data: StaffMember }) {
   const s = data;
   const score = impactScore(s);
   const tier = impactTier(score);
@@ -224,7 +224,9 @@ function StaffCard({ data }: { data: StaffMember }) {
       </div>
     </div>
   );
-}
+});
+
+StaffCard.displayName = "StaffCard";
 
 function topAttrsForRole(s: StaffMember): Array<[string, number]> {
   switch (s.role) {

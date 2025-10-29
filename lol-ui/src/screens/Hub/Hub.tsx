@@ -12,7 +12,8 @@ import PlayerPage from "./pages/Player"; // fiche FM-like
 import TacticsPage from "./pages/Tactics";
 import SaveBar from "../../ui/SaveBar";
 import LogoImg from "../../ui/LogoImg";
-import { readDB, persistDB } from "@/utils/saveIO";
+import { useGameStore } from "@/state/gameStore";
+import type { GameDB } from "@/utils/types";
 
 // composants & helpers
 import TopActions from "../Home/components/TopActions";
@@ -31,21 +32,16 @@ type Clock = { week: number; dayIndex: number };
 
 /* =============== Utils =============== */
 
-function ensureMeta(db: any) {
-  db.meta ??= {};
-  db.meta.version ??= 1;
-  db.meta.league ??= "LCK";
-  db.meta.timezone ??= "Asia/Seoul";
-  db.meta.season ??= 1;
-  db.meta.currentWeek ??= 1;
-  db.meta.currentDayIndex ??= 0;
-  db.meta.rngSeed ??= Date.now();
-  db.meta.updatedAt ??= new Date().toISOString();
-}
-
-function readGame() {
-  const r = readDB();
-  return { ...r, db: r.db as any };
+function ensureMeta(db: GameDB) {
+  const meta = (db.meta ??= {} as NonNullable<GameDB["meta"]>);
+  meta.version ??= 1;
+  meta.league ??= "LCK";
+  meta.timezone ??= "Asia/Seoul";
+  meta.season ??= 1;
+  meta.currentWeek ??= 1;
+  meta.currentDayIndex ??= 0;
+  meta.rngSeed ??= Date.now();
+  meta.updatedAt ??= new Date().toISOString();
 }
 
 /* =============== Component =============== */
@@ -54,28 +50,52 @@ export default function Hub({ profile, league, team }: Props) {
   const [tab, setTab] = useState<Tab>("home");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
-  const [clock, setClock] = useState<Clock>(() => {
-    const { db } = readGame();
-    return {
-      week: db?.meta?.currentWeek ?? 1,
-      dayIndex: db?.meta?.currentDayIndex ?? 0,
-    };
-  });
+  const [clock, setClock] = useState<Clock>({ week: 1, dayIndex: 0 });
 
-  const [refresh, setRefresh] = useState(0);
+  const db = useGameStore(state => state.db);
+  const status = useGameStore(state => state.status);
+  const load = useGameStore(state => state.load);
+  const setDb = useGameStore(state => state.setDb);
+  const persist = useGameStore(state => state.persist);
+  const setContext = useGameStore(state => state.setContext);
+
+  useEffect(() => {
+    if (!db && status === "idle") {
+      void load();
+    }
+  }, [db, status, load]);
+
+  useEffect(() => {
+    setContext({
+      profile: profile ? {
+        name: profile.name,
+        nationality: profile.nationality,
+        autosave: profile.autosave,
+        ironman: profile.ironman,
+      } : undefined,
+      league,
+      team: team ? {
+        id: team.id,
+        name: team.name,
+        budgetEUR: team.budgetEUR,
+        objective: team.objective,
+        stars: team.stars,
+        logo: team.logo,
+      } : undefined,
+    });
+  }, [profile, league, team, setContext]);
+
+  useEffect(() => {
+    if (!db?.meta) return;
+    setClock({
+      week: db.meta.currentWeek ?? 1,
+      dayIndex: db.meta.currentDayIndex ?? 0,
+    });
+  }, [db?.meta?.currentWeek, db?.meta?.currentDayIndex]);
 
   const t = team as TeamCard & { id?: string; logo?: string };
   const logo = t.logo ?? `/logos/lck/${t.id || "default"}.png`;
   const teamName = team?.name || "Équipe";
-
-  // Sync clock from save at mount
-  useEffect(() => {
-    const { db } = readGame();
-    setClock({
-      week: db?.meta?.currentWeek ?? 1,
-      dayIndex: db?.meta?.currentDayIndex ?? 0,
-    });
-  }, []);
 
   // écouteur global : ouvrir l’onglet calendrier depuis Dashboard (ou ailleurs)
   useEffect(() => {
@@ -90,9 +110,6 @@ export default function Hub({ profile, league, team }: Props) {
     window.addEventListener("open-schedule", handler as EventListener);
     return () => window.removeEventListener("open-schedule", handler as EventListener);
   }, []);
-
-  // relit la save pour refléter les changements
-  const { db, root, where } = useMemo(() => readGame(), [refresh, clock.week, clock.dayIndex]);
 
   // combien de matchs aujourd’hui (dans le jour calendrier courant)
   const todayRemaining = useMemo(() => {
@@ -109,13 +126,25 @@ export default function Hub({ profile, league, team }: Props) {
 
   /* -------- actions -------- */
 
+  function commitDb(mutator: (draft: GameDB) => void) {
+    if (!db) return;
+    const draft = db;
+    mutator(draft);
+    const nextMeta = draft.meta ? { ...draft.meta } : draft.meta;
+    const nextDb: GameDB = { ...draft, meta: nextMeta };
+    setDb(nextDb);
+    void persist({ file: nextDb });
+  }
+
   function persistMeta(mutate: (m: any) => void) {
     if (!db) return;
-    ensureMeta(db);
-    mutate(db.meta);
-    db.meta.updatedAt = new Date().toISOString();
-    persistDB(root, where, db);
-    setRefresh(x => x + 1);
+    commitDb(draft => {
+      ensureMeta(draft);
+      mutate(draft.meta as NonNullable<GameDB["meta"]>);
+      if (draft.meta) {
+        draft.meta.updatedAt = new Date().toISOString();
+      }
+    });
   }
 
   function advanceOneDayInSave() {
@@ -143,10 +172,12 @@ export default function Hub({ profile, league, team }: Props) {
     if (!target) return;
     const score = simulateBo3();
     target.played = true; target.score = score;
-    applyResultToStandings(db, { home: target.home, away: target.away, score });
-    db.meta.updatedAt = new Date().toISOString();
-    persistDB(root, where, db);
-    setRefresh(x => x + 1);
+    commitDb(draft => {
+      applyResultToStandings(draft, { home: target.home, away: target.away, score });
+      if (draft.meta) {
+        draft.meta.updatedAt = new Date().toISOString();
+      }
+    });
   }
 
   function playAllMatchesOfToday() {
@@ -158,14 +189,16 @@ export default function Hub({ profile, league, team }: Props) {
       ? arr.filter((s: any) => (s.dayName ?? "") === sel.value && !s.played && s.score == null)
       : arr.filter((s: any) => (s.dayIndex ?? -1) === sel.value && !s.played && s.score == null);
     if (!list.length) return;
-    for (const m of list) {
-      const score = simulateBo3();
-      m.played = true; m.score = score;
-      applyResultToStandings(db, { home: m.home, away: m.away, score });
-    }
-    db.meta.updatedAt = new Date().toISOString();
-    persistDB(root, where, db);
-    setRefresh(x => x + 1);
+    commitDb(draft => {
+      for (const m of list) {
+        const score = simulateBo3();
+        m.played = true; m.score = score;
+        applyResultToStandings(draft, { home: m.home, away: m.away, score });
+      }
+      if (draft.meta) {
+        draft.meta.updatedAt = new Date().toISOString();
+      }
+    });
   }
 
   // ✅ FIX : avancer au prochain jour AVEC match en mettant à jour (week, dayIndex)
@@ -212,6 +245,8 @@ export default function Hub({ profile, league, team }: Props) {
     setClock({ week: targetWeek, dayIndex: targetDay });
     persistMeta(m => { m.currentWeek = targetWeek; m.currentDayIndex = targetDay; });
   }
+
+  if (!db) return null;
 
   return (
     <div className="hub-shell">

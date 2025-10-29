@@ -1,37 +1,54 @@
-﻿import type { SaveStore, SaveFile, SlotId } from "./types";
+import type { SaveFile, SaveListEntry, SaveStore, SlotId } from "./types";
 
 const KEY = "lolm2:saves:v1";
-type Dict = Record<string, string>;
+const SLOTS: SlotId[] = ["slot-1", "slot-2", "slot-3"];
+
+type Dict = Partial<Record<SlotId, string>>;
+
+type ParseResult<TState> = { file: SaveFile<TState>; raw: string } | null;
+
+function safeParse<TState>(raw: string | null | undefined): ParseResult<TState> {
+  if (!raw) return null;
+  try {
+    return { file: JSON.parse(raw) as SaveFile<TState>, raw };
+  } catch {
+    return null;
+  }
+}
 
 function readAll(): Dict {
-  try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
-  catch { return {}; }
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Dict;
+  } catch {
+    return {};
+  }
 }
-function writeAll(d: Dict) {
-  localStorage.setItem(KEY, JSON.stringify(d));
+
+function writeAll(dict: Dict) {
+  localStorage.setItem(KEY, JSON.stringify(dict));
 }
 
 export function createLocalStorageStore<TState>(): SaveStore<TState> {
   return {
-    async list() {
+    async list(): Promise<SaveListEntry[]> {
       const all = readAll();
-      const slots: SlotId[] = ["slot-1", "slot-2", "slot-3"];
-      return slots.map(slot => {
-        const raw = all[slot];
-        if (!raw) return { slot, exists: false };
-        try {
-          const file = JSON.parse(raw) as SaveFile<TState>;
-          return { slot, exists: true, updatedAt: file.updatedAt ?? file.savedAt };
-        } catch {
-          return { slot, exists: true };
-        }
+      return SLOTS.map(slot => {
+        const parsed = safeParse<TState>(all[slot] ?? null);
+        if (!parsed) return { slot, exists: false } satisfies SaveListEntry;
+        const { file } = parsed;
+        return {
+          slot,
+          exists: true,
+          updatedAt: file.updatedAt ?? file.savedAt,
+          summary: file.summary,
+        } satisfies SaveListEntry;
       });
     },
     async read(slot) {
-      const raw = readAll()[slot];
-      if (!raw) return null;
-      try { return JSON.parse(raw) as SaveFile<TState>; }
-      catch { return null; }
+      const parsed = safeParse<TState>(readAll()[slot] ?? null);
+      return parsed?.file ?? null;
     },
     async write(slot, file) {
       const all = readAll();
@@ -40,8 +57,10 @@ export function createLocalStorageStore<TState>(): SaveStore<TState> {
     },
     async remove(slot) {
       const all = readAll();
-      delete all[slot];
-      writeAll(all);
-    }
+      if (slot in all) {
+        delete all[slot];
+        writeAll(all);
+      }
+    },
   };
 }
