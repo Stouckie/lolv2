@@ -1,12 +1,13 @@
 import type { SaveStore } from "./types";
 import { createLocalStorageStore } from "./localStorageStore";
-import { createTauriStore } from "./tauriStore";
+import { createTauriStore, type TauriApi } from "./tauriStore";
 
 let cached: SaveStore<unknown> | null = null;
 
-function hasTauri(): boolean {
-  if (typeof window === "undefined") return false;
-  return Boolean((window as unknown as { __TAURI__?: unknown }).__TAURI__);
+function resolveTauri(): TauriApi | null {
+  if (typeof window === "undefined") return null;
+  const api = (window as unknown as { __TAURI__?: TauriApi | null | undefined }).__TAURI__;
+  return api ?? null;
 }
 
 export function getSaveStore<TState>(): SaveStore<TState> {
@@ -14,9 +15,8 @@ export function getSaveStore<TState>(): SaveStore<TState> {
     return cached as SaveStore<TState>;
   }
 
-  const store = hasTauri()
-    ? createTauriStore<TState>()
-    : createLocalStorageStore<TState>();
+  const tauri = resolveTauri();
+  const store = tauri ? createTauriStore<TState>(tauri) : createLocalStorageStore<TState>();
 
   cached = store as SaveStore<unknown>;
   return store;

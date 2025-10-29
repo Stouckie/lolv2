@@ -13,19 +13,13 @@ interface TauriPathApi {
   join(...paths: string[]): Promise<string>;
 }
 
-interface TauriApi {
+export interface TauriApi {
   fs: TauriFsApi;
   path: TauriPathApi;
 }
 
 const SLOTS: SlotId[] = ["slot-1", "slot-2", "slot-3"];
 const SAVE_DIR = ["LoLManager", "saves"];
-
-function getTauri(): TauriApi | null {
-  if (typeof window === "undefined") return null;
-  const api = (window as unknown as { __TAURI__?: TauriApi }).__TAURI__;
-  return api ?? null;
-}
 
 async function resolveBaseDir(pathApi: TauriPathApi): Promise<string> {
   const appData = await pathApi.appDataDir();
@@ -55,12 +49,7 @@ async function readSlot<TState>(tauri: TauriApi, slot: SlotId): Promise<SaveFile
   }
 }
 
-export function createTauriStore<TState>(): SaveStore<TState> {
-  const tauri = getTauri();
-  if (!tauri) {
-    throw new Error("Tauri API unavailable");
-  }
-
+export function createTauriStore<TState>(tauri: TauriApi): SaveStore<TState> {
   return {
     async list(): Promise<SaveListEntry[]> {
       await ensureBaseDir(tauri);
