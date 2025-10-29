@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../../styles/finance.css";
+import { useGameStore } from "@/state/gameStore";
 
 /**
  * Finance V1 — lit window.__LOL_DB et déduit si besoin.
@@ -19,15 +20,17 @@ function eur(n: number | undefined, opts: Intl.NumberFormatOptions = {}) {
 function pct(n: number) { return `${Math.round(n)}%`; }
 function clamp(n: number, a: number, b: number) { return Math.max(a, Math.min(b, n)); }
 
-function pickTeam(db: AnyObj): Team | undefined {
+function pickTeam(db: AnyObj, contextTeam?: Team | null): Team | undefined {
   const ctxTeam: Team | undefined =
-    (db?.context?.team as Team) ||
-    (db?.__CTX?.team as Team) ||
-    (typeof window !== "undefined" ? (window as any).__LOL_CTX?.team : undefined);
+    contextTeam ??
+    (db?.context?.team as Team) ??
+    (db?.__CTX?.team as Team);
 
   if (ctxTeam?.id) return ctxTeam;
 
-  const byGlobalId = (typeof window !== "undefined" ? (window as any).__LOL_TEAM_ID : undefined);
+  const byGlobalId =
+    (db?.context?.teamId as string | undefined) ??
+    (db?.__CTX?.teamId as string | undefined);
   if (byGlobalId) return (db?.teams || []).find((t: Team) => t.id === byGlobalId);
 
   if (db?.user?.teamId) return (db?.teams || []).find((t: Team) => t.id === db.user.teamId);
@@ -37,14 +40,10 @@ function pickTeam(db: AnyObj): Team | undefined {
 
 export default function FinanceScreen() {
   const navigate = useNavigate();
-  const [db, setDb] = useState<AnyObj>({});
+  const db = useGameStore(state => state.db);
+  const contextTeam = useGameStore(state => state.context.team);
 
-  useEffect(() => {
-    const d = (typeof window !== "undefined" ? (window as any).__LOL_DB : undefined) || {};
-    setDb(d);
-  }, []);
-
-  const team: Team | undefined = useMemo(() => pickTeam(db), [db]);
+  const team: Team | undefined = useMemo(() => pickTeam(db ?? {}, contextTeam), [db, contextTeam]);
   const league = (team?.league || db?.meta?.league || "LCK") as string;
 
   const {
@@ -103,6 +102,8 @@ export default function FinanceScreen() {
       resultMonth, burnRate, runwayMonths, healthScore,
     };
   }, [db, team, league]);
+
+  if (!db) return null;
 
   const wageTotal = payrollPlayers + payrollStaff;
   const wageVsBudget = budgetSalaryMonthly > 0 ? (wageTotal / budgetSalaryMonthly) : 1;
