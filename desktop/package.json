@@ -2,8 +2,12 @@
   "name": "desktop",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "echo 'desktop stub: implement Tauri in PR #5'",
-    "build": "echo 'desktop stub: implement Tauri in PR #5'"
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
   }
 }
