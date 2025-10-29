@@ -1,0 +1,9 @@
+{
+  "name": "desktop",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "echo 'desktop stub: implement Tauri in PR #5'",
+    "build": "echo 'desktop stub: implement Tauri in PR #5'"
+  }
+}
