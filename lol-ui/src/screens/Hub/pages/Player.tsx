@@ -103,12 +103,16 @@ export default function PlayerPage({ playerId, onBack }: Props) {
   const conf = player.valueConfidence != null ? Math.round(player.valueConfidence * 100) : null;
   const monthsLeft = Number.isFinite(player.monthsLeft) ? player.monthsLeft : null;
 
-  const metricKeys = Array.from(new Set(groups.flatMap((g) => g.keys)));
-  const top3 = metricKeys
-    .map((k) => ({ k, v: Number(player[k] ?? -1) }))
-    .filter((x) => x.v >= 0)
-    .sort((a, b) => b.v - a.v)
-    .slice(0, 3);
+  const metricKeys = useMemo(() => Array.from(new Set(groups.flatMap((g) => g.keys))), [groups]);
+  const top3 = useMemo(
+    () =>
+      metricKeys
+        .map((k) => ({ k, v: Number(player[k] ?? -1) }))
+        .filter((x) => x.v >= 0)
+        .sort((a, b) => b.v - a.v)
+        .slice(0, 3),
+    [metricKeys, player]
+  );
 
   return (
     <div className="player-shell">
@@ -140,8 +144,8 @@ export default function PlayerPage({ playerId, onBack }: Props) {
               {!!top3.length && (
                 <div className="scout">
                   <span className="muted">Scout summary:&nbsp;</span>
-                  {top3.map((s, i) => (
-                    <span key={i} className="scout-pill">
+                  {top3.map((s) => (
+                    <span key={s.k} className="scout-pill">
                       {(LABELS[s.k] ?? s.k) + " " + Math.round(s.v)}
                     </span>
                   ))}
@@ -254,8 +258,8 @@ export default function PlayerPage({ playerId, onBack }: Props) {
               <>
                 <div className="panel-sub">Sources</div>
                 <ul className="sources">
-                  {player.sources.map((s: string, i: number) => (
-                    <li key={i}>• {s}</li>
+                  {player.sources.map((source: string) => (
+                    <li key={`${player.id ?? player.ign ?? "source"}-${source}`}>• {source}</li>
                   ))}
                 </ul>
               </>

@@ -95,14 +95,17 @@ export default function SchedulePage({ league, team }: { league: "LCK"; team: Te
 
       <div className="week-grid">
         {Array.from({ length: 7 }, (_, di) => (
-          <div className="day" id={`day-${weekNum}-${di}`} key={di}>
+          <div className="day" id={`day-${weekNum}-${di}`} key={`${weekNum}-${names[di] ?? di}`}>
             <div className="day-head">{names[di]}</div>
 
             {days[di].length === 0 ? (
               <div className="muted small">—</div>
             ) : (
-              days[di].map((s: any, i: number) => (
-                <div className={`match-card ${s.played ? "played" : "pending"}`} key={i}>
+              days[di].map((s: any) => (
+                <div
+                  className={`match-card ${s.played ? "played" : "pending"}`}
+                  key={scheduleMatchKey(weekNum, di, s)}
+                >
                   <div className="row">
                     <span className="pill">BO{s.bo ?? 1}</span>
                     <span className="pill">{s.timeLocalKST ?? s.startTime ?? "—"} KST</span>
@@ -128,4 +131,16 @@ export default function SchedulePage({ league, team }: { league: "LCK"; team: Te
 
 function nameOf(db: any, id: string) {
   return (db?.teams || []).find((t: any) => t.id === id || t.slug === id)?.name ?? id;
+}
+
+function scheduleMatchKey(weekNumber: number, dayIndex: number, match: any) {
+  if (match?.id != null) return String(match.id);
+  if (match?.matchId != null) return String(match.matchId);
+  if (match?.slug != null) return String(match.slug);
+  const slot = match?.slot ?? 0;
+  const bestOf = match?.bo ?? match?.bestOf ?? "";
+  const home = match?.home ?? "home";
+  const away = match?.away ?? "away";
+  const composed = [weekNumber, dayIndex, slot, bestOf, home, away].join(":");
+  return composed;
 }
