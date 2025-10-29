@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+﻿import fs from "node:fs/promises";
 import path from "node:path";
 import { Champion, Player, Team, MetaParams, MatchFixture, Standing, FinanceState, SaveSnapshot } from "./schemas";
 
@@ -19,7 +19,7 @@ export async function loadSeedSnapshot(): Promise<SaveSnapshot> {
   const standings: Record<string, Standing> = {};
   const finances:  Record<string, FinanceState> = {};
   for (const t of teamIds) {
-    standings[t] = { teamId: t, wins: 0, losses: 0, form: [] };
+    standings[t] = { teamId: t, wins: 0, losses: 0, gamesWon: 0, gamesLost: 0, form: [] };
     finances[t]  = { cash: 500_000, revenueYTD: 0, expensesYTD: 0 };
   }
 

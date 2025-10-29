@@ -1,4 +1,4 @@
-import type { Player } from "./types";
+﻿import type { Player } from "./sim/types";
 import { applyPerks, StaffCtx } from "./staff";
 
 let rookieIdCounter = 1;
@@ -35,6 +35,6 @@ function pickWeighted(dist:Record<string,number>){
 }
 
 export function retirementProbability(age:number, moralePenalty=0){
-  const base = Math.max(0, (age - 26) * 0.03); // 3% par an après 26
+  const base = Math.max(0, (age - 26) * 0.03); // 3% par an aprÃ¨s 26
   return Math.min(0.9, base + moralePenalty);
 }

@@ -1,6 +1,6 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
-export const Role = z.enum(["TOP","JUNGLE","MID","ADC","SUP"]);
+export const Role = z.enum(["TOP","JNG","MID","ADC","SUP"]);
 export const Archetype = z.enum(["Assassin","Bruiser","Mage","Tank","Marksman","Enchanter"]);
 export const StaffRole = z.enum(["HeadCoach","Analyst","Scout","Trainer","Psychologist","GM"]);
 
@@ -103,7 +103,11 @@ export const MatchFixture = z.object({
 export type MatchFixture = z.infer<typeof MatchFixture>;
 
 export const Standing = z.object({
-  teamId: ID, wins:z.number().int().nonnegative(), losses:z.number().int().nonnegative(),
+  teamId: ID,
+  wins: z.number().int().nonnegative(),
+  losses: z.number().int().nonnegative(),
+  gamesWon: z.number().int().nonnegative().default(0),
+  gamesLost: z.number().int().nonnegative().default(0),
   form: z.array(z.number().int().min(0).max(1)).default([])
 });
 export type Standing = z.infer<typeof Standing>;

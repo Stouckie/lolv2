@@ -33,3 +33,23 @@
 .panel{border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.02);padding:12px;margin:16px 18px}
 .placeholder{min-height:180px}
 .muted{opacity:.7}
+
+/* Burger menu in top-actions */
+.top-actions details.menu { position: relative; }
+.top-actions details.menu > summary {
+  list-style: none; cursor: pointer; user-select: none;
+}
+.top-actions details.menu[open] > summary { filter: brightness(1.1); }
+.top-actions details.menu .menu-popover{
+  position: absolute; right: 0; top: calc(100% + 8px);
+  background: var(--panel, #141418);
+  border: 1px solid var(--border, #23232a);
+  border-radius: 12px; padding: 10px; min-width: 260px; z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+/* éviter que les gros boutons prennent toute la largeur si SaveBar en rend */
+.top-actions details.menu .menu-popover button,
+.top-actions details.menu .menu-popover .btn,
+.top-actions details.menu .menu-popover .btn-accent {
+  width: 100%; text-align: left; margin: 4px 0;
+}

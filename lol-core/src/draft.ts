@@ -1,11 +1,12 @@
-import type { Champion, TeamComp, DraftContext, Role } from "./types";
+﻿import type { Champion, TeamComp, DraftContext } from "./sim/types";
+import type { Role } from "./types";
 import { applyPerks, staffLookaheadDepth } from "./staff";
 
 export interface DraftOutcome { blue: TeamComp; red: TeamComp; bans: { blue:string[]; red:string[] } }
 
 const roleKey: Record<Role, keyof TeamComp> = {
   TOP: "top",
-  JUNGLE: "jungle",
+  JNG: "jungle",
   MID: "mid",
   ADC: "adc",
   SUP: "sup"
@@ -120,7 +121,7 @@ function pickBestLookahead(
 
     if (depth>1){
       const enemyRole =
-        (["TOP","JUNGLE","MID","ADC","SUP"] as Role[])
+        (["TOP","JNG","MID","ADC","SUP"] as Role[])
         .find(r => !(enemy as any)[roleKey[r]]);
       if (enemyRole){
         const avail2 = new Set(available); avail2.delete(id);
@@ -136,3 +137,4 @@ function pickBestLookahead(
   }
   return best?.id;
 }
+

@@ -1,4 +1,4 @@
-import type { Facilities, StaffMember, StaffPerk, PerkTrigger } from "./types";
+﻿import type { Facilities, StaffMember, StaffPerk, PerkTrigger } from "./sim/types";
 
 export interface StaffCtx { staff: Partial<Record<StaffMember["role"], StaffMember>>; facilities: Facilities }
 

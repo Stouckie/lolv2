@@ -1,10 +1,10 @@
-import type { SaveStore, SaveFile, SlotId } from "./types";
+﻿import type { SaveStore, SaveFile, SlotId } from "./types";
 
 const KEY = "lolm2:saves:v1";
 type Dict = Record<string, string>;
 
 function readAll(): Dict {
-  try { return JSON.parse(localStorage.getItem(KEY) || "{}") as Dict; }
+  try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
   catch { return {}; }
 }
 function writeAll(d: Dict) {
@@ -15,13 +15,13 @@ export function createLocalStorageStore<TState>(): SaveStore<TState> {
   return {
     async list() {
       const all = readAll();
-      const slots: SlotId[] = ["slot-1","slot-2","slot-3"];
+      const slots: SlotId[] = ["slot-1", "slot-2", "slot-3"];
       return slots.map(slot => {
         const raw = all[slot];
         if (!raw) return { slot, exists: false };
         try {
-          const f = JSON.parse(raw) as SaveFile<TState>;
-          return { slot, exists: true, savedAt: f.savedAt };
+          const file = JSON.parse(raw) as SaveFile<TState>;
+          return { slot, exists: true, updatedAt: file.updatedAt ?? file.savedAt };
         } catch {
           return { slot, exists: true };
         }
@@ -30,7 +30,8 @@ export function createLocalStorageStore<TState>(): SaveStore<TState> {
     async read(slot) {
       const raw = readAll()[slot];
       if (!raw) return null;
-      try { return JSON.parse(raw) as SaveFile<TState>; } catch { return null; }
+      try { return JSON.parse(raw) as SaveFile<TState>; }
+      catch { return null; }
     },
     async write(slot, file) {
       const all = readAll();

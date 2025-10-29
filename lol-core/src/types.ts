@@ -1,74 +1,116 @@
-export type Role = "TOP" | "JUNGLE" | "MID" | "ADC" | "SUP";
-export type Archetype = "Assassin"|"Bruiser"|"Mage"|"Tank"|"Marksman"|"Enchanter";
-export type TeamSide = "BLUE" | "RED";
+﻿export type Role = "TOP" | "JNG" | "MID" | "ADC" | "SUP";
+export type StaffRole = "Coach" | "Analyst" | "Scout" | "Physio";
+export type DayName = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
 
-export interface Champion {
-  id: string; name: string; roles: Role[]; archetype: Archetype;
-  base: { dps:number; burst:number; sustain:number; control:number; mobility:number; toughness:number };
-  scaling: { early:number; mid:number; late:number };
-  tags?: string[];
+export interface Team {
+  id: string;
+  name: string;
+  short: string;
+  rep: number; // 0..100 reputation
+  cash: number; // current cash balance
+  sponsorPerDay: number; // sponsor income per day
+  payrollPerDay: number; // wage costs per day
+  logo?: string;
 }
 
 export interface Player {
-  id: string; name: string; role: Role; age: number;
-  salary: number; potential: number;
-  ratings: Record<string, number>;
-  personality?: { discipline?:number; ego?:number; teamplay?:number; consistency?:number };
-  comfortTags?: string[];
-  currentTeamId?: string;
+  id: string;
+  teamId: string;
+  name: string;
+  role: Role;
+  age: number;
+  nat: string;
+  ovr: number;
+  pot: number;
+  lane: number;
+  mech: number;
+  macro: number;
+  champPool: number;
+  style: "aggressive" | "control" | "skirmish" | "late";
+  wagePerDay: number;
+  contractEnd: string; // ISO date
+  morale: number; // 0..100
+  fitness: number; // 0..100
+  form: number; // -3..+3
 }
 
-export type StaffRole = "HeadCoach"|"Analyst"|"Scout"|"Trainer"|"Psychologist"|"GM";
-export type PerkTrigger =
-  | "DRAFT_PICK_SCORE" | "DRAFT_BAN_SCORE" | "DRAFT_LOOKAHEAD"
-  | "PREP_COUNTER_ACCURACY" | "PREP_META_READ"
-  | "TRAINING_GAIN" | "SCRIM_GAIN" | "FATIGUE_RECOVERY" | "INJURY_RISK"
-  | "SCOUT_DISCOVERY_RATE" | "SCOUT_INFO_QUALITY"
-  | "CONTRACT_NEGOTIATION" | "BUYOUT_DISCOUNT";
-export interface StaffPerk { id:string; trigger: PerkTrigger; value:number; cap?:number; tags?:string[] }
-export interface StaffMember { id:string; name:string; role:StaffRole; level:1|2|3|4|5; salary:number; xp:number; perks:StaffPerk[] }
-export interface Facilities { trainingCenterLv:0|1|2|3; analyticsLabLv:0|1|2|3; scoutingNetworkLv:0|1|2|3 }
-
-export interface Team {
-  id: string; name: string; region: string; budget: number;
-  roster: { top?:string; jungle?:string; mid?:string; adc?:string; sup?:string };
-  academy: string[];
-  staff: Partial<Record<StaffRole, StaffMember>>;
-  facilities: Facilities;
+export interface Staff {
+  id: string;
+  teamId: string;
+  name: string;
+  role: StaffRole;
+  skill: number;
+  wagePerDay: number;
 }
 
-export interface TeamComp { top:string; jungle:string; mid:string; adc:string; sup:string; }
-
-export interface MetaParams {
-  enchanterBias:number; skirmishBias:number; objectiveWeight:number;
-  wSynergy:number; wComfort:number; wMeta:number;
-}
-
-export interface MatchConfig { rngSeed?: number | string; meta: MetaParams }
-
-export interface MatchResult {
-  winner: TeamSide;
-  score: { blue:number; red:number };
-  mvpChampionId: string;
-  log: string[];
-}
-
-export interface League {
-  patch: string;
-  champions: Record<string, Champion>;
-  players: Record<string, Player>;
-  teams: Record<string, Team>;
-  meta: MetaParams;
-  schedule: Array<{ week:number; blueTeamId:string; redTeamId:string; bo:number }>;
-  standings: Record<string, { wins:number; losses:number; form:number[] }>;
-  finances: Record<string, { cash:number; revenueYTD:number; expensesYTD:number }>;
+export interface Series {
   week: number;
+  dayIndex: number; // 0..6
+  dayName: DayName;
+  slot: 0 | 1;
+  bo: 3;
+  home: string;
+  away: string;
+  timeLocalKST?: string;
+  startTime?: string;
+  round: number;
+  played?: boolean;
+  score: [number, number] | null;
 }
 
-export interface DraftContext {
-  pool: Record<string,Champion>;
-  meta: MetaParams;
-  staff: { staff: Partial<Record<StaffMember["role"], StaffMember>>; facilities: Facilities };
-  comfort?: Record<string, number>;
-  opponentHints?: string[];
+export interface Week {
+  week: number;
+  days?: Series[];
+  series?: Series[];
 }
+
+export interface StandingsRow {
+  teamId: string;
+  wins: number;
+  losses: number;
+  gamesWon: number;
+  gamesLost: number;
+}
+
+export interface Meta {
+  version: number;
+  league: "LCK";
+  timezone: "Asia/Seoul";
+  season: number;
+  currentWeek: number;
+  currentDayIndex: number;
+  rngSeed: number;
+  updatedAt: string;
+
+  // ▼ nouveau bloc
+  calendar?: CalendarMeta;
+}
+
+
+export interface CalendarMeta {
+  startISO: string;      // ex. "2025-01-15T00:00:00+09:00"
+  timezone?: string;     // ex. "Asia/Seoul"
+}
+
+export interface SeriesResult {
+  week: number;
+  dayIndex: number;
+  slot: 0 | 1;
+  home: string;
+  away: string;
+  winner?: "home" | "away";
+  score: [number, number] | null;
+  completedAt?: string;
+}
+
+export interface GameDB {
+  meta: Meta;
+  teams: Team[];
+  players: Player[];
+  staff: Staff[];
+  schedule: Week[];
+  standings: StandingsRow[];
+  results: SeriesResult[];
+}
+
+

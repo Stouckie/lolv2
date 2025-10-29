@@ -1,5 +1,5 @@
-// Surface publique du core (importée par l'UI)
-export * from "./models";
-export { buildLckDB, createNewGameSave } from "./seedLCK";
-export * from "./lib/lckSchedule";
-// Ne pas ré-exporter d'anciens ./types pour éviter les collisions
+﻿export * from "./types";
+export { createNewGameSave } from "./db/seedLCK";
+// lol-core/src/index.ts
+export { LCK_PLAYERS_2025, LCK_PLAYERS_META_2025 } from "./data/lck";
+export type { LckPlayer, LckPlayersPayload } from "./data/lck";

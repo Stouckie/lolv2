@@ -20,3 +20,5 @@
 .squad-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .btn { padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: #e8ebf3; cursor: pointer; }
 @media (max-width: 1280px) { .roles-grid { grid-template-columns: 1fr; } }
+.prow.clickable{cursor:pointer}
+.prow.clickable:hover{filter:brightness(1.05)}

@@ -1,0 +1,63 @@
+.schedule { display: flex; flex-direction: column; gap: 16px; }
+
+.schedule-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin-bottom: 4px;
+}
+.schedule-toolbar .btn { padding: 6px 10px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); }
+.schedule-toolbar .pill { padding: 6px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); }
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.day {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  min-height: 140px;
+}
+.day.focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.day-head {
+  font-weight: 600; opacity: .9; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.match-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 8px;
+}
+.match-card .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.match-card .teams {
+  display: flex; gap: 8px; align-items: center; justify-content: center;
+  font-weight: 600;
+}
+.match-card .vs { opacity: .7; }
+
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--border);
+  font-size: 12px; white-space: nowrap;
+}
+.pill.strong { font-weight: 700; }
+
+.muted { opacity: .6; }
+.muted.small { font-size: 12px; }
+
+ /* NextMatchCard quick styles */
+.nm-wrap { display: flex; flex-direction: column; gap: 10px; }
+.nm-row { display: flex; align-items: center; gap: 10px; }
+.nm-vs { opacity: .7; }
+.nm-badge { display: inline-flex; align-items: center; gap: 8px; }
+.nm-badge img { width: 20px; height: 20px; object-fit: contain; }
+.nm-meta { display: flex; gap: 8px; align-items: center; }
+.nm-actions { display: flex; gap: 8px; align-items: center; }
+.pill.accent { border-color: var(--accent); }

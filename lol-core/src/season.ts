@@ -1,4 +1,4 @@
-import type { League, TeamComp, MatchResult } from "./types";
+﻿import type { League, TeamComp, MatchResult } from "./sim/types";
 import { simulateMatch } from "./match";
 import { weeklyFinanceUpdate } from "./finances";
 
@@ -8,7 +8,7 @@ export function tickWeek(lg: League, seed=0){
   const results: MatchResult[] = [];
 
   for (const m of matches) {
-    // Compose compo actuelle (simple : prend le meilleur champion de rôle en fonction du joueur)
+    // Compose compo actuelle (simple : prend le meilleur champion de rÃ´le en fonction du joueur)
     const blueComp = autoComp(lg, m.blueTeamId);
     const redComp  = autoComp(lg, m.redTeamId);
 
@@ -47,7 +47,7 @@ function autoComp(lg:League, teamId:string): TeamComp {
   const t = lg.teams[teamId];
   const pick = (role: "top"|"jungle"|"mid"|"adc"|"sup")=>{
     const pid = t.roster[role]; if (!pid) throw new Error(`Missing ${role} in ${teamId}`);
-    // Pick le champion où le rating joueur est max parmi ceux de ce rôle
+    // Pick le champion oÃ¹ le rating joueur est max parmi ceux de ce rÃ´le
     const ratings = lg.players[pid].ratings;
     let bestId = ""; let best = -1;
     for (const [champId, r] of Object.entries(ratings)) {

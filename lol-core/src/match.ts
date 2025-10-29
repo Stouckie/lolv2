@@ -1,4 +1,4 @@
-import type { Champion, TeamComp, MatchConfig, MatchResult, TeamSide, MetaParams } from "./types";
+﻿import type { Champion, TeamComp, MatchConfig, MatchResult, TeamSide, MetaParams } from "./sim/types";
 import { rngFromSeed } from "./rng";
 
 function baseTeamScore(comp:TeamComp, pool:Record<string,Champion>) {
@@ -13,7 +13,7 @@ function synergyTeam(comp:TeamComp, pool:Record<string,Champion>, meta:MetaParam
   const champs = (Object.values(comp) as string[]).map(id=>pool[id]);
   const kinds = new Set(champs.map(c=>c.archetype)).size;
   let mult = 1.0;
-  if (kinds <= 3) mult *= 1 + 0.03 * meta.wSynergy; // cohérence
+  if (kinds <= 3) mult *= 1 + 0.03 * meta.wSynergy; // cohÃ©rence
   const enchanter = champs.some(c=>c.archetype==="Enchanter");
   if (enchanter) mult *= 1 + 0.02 * meta.enchanterBias;
   return mult;
@@ -25,7 +25,7 @@ export function simulateMatch(blue:TeamComp, red:TeamComp, pool:Record<string,Ch
   const bBase = baseTeamScore(blue, pool), rBase = baseTeamScore(red, pool);
   const bSyn  = synergyTeam(blue, pool, cfg.meta), rSyn = synergyTeam(red, pool, cfg.meta);
 
-  // bruit “compétitif” (constance  via meta.wMeta)
+  // bruit â€œcompÃ©titifâ€ (constance  via meta.wMeta)
   const varScale = 0.10 * (1.0 / Math.max(0.5, cfg.meta.wMeta)); // +wMeta -> moins de variance
   const noiseB = 1 + (rng()-0.5)*varScale;
   const noiseR = 1 + (rng()-0.5)*varScale;

@@ -1,16 +1,17 @@
-﻿﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 // ⬇️ conserve tes imports UI
 import { Logo } from "../../ui/Logo";
 import { MenuButton } from "../../ui/MenuButton";
 
 import { getSaveStore } from "../../persist/store";
+import type { GameDB } from "../../utils/types";
 
 export type HomeAction = "new" | "load" | "settings";
 
 export default function Home({ onAction }: { onAction: (a: HomeAction) => void }) {
   const [hasSave, setHasSave] = useState(false);
   const [patch, setPatch] = useState("14.20");
-  const store = useMemo(() => getSaveStore<any>(), []);
+  const store = useMemo(() => getSaveStore<GameDB>(), []);
 
   useEffect(() => {
     let mounted = true;
@@ -37,7 +38,7 @@ export default function Home({ onAction }: { onAction: (a: HomeAction) => void }
         <Logo />
         <div className="home-header-right">
           <span className="pill">Patch {patch}</span>
-          <span className="pill">Solo • Offline</span>
+          <span className="pill">Solo - Offline</span>
         </div>
       </header>
 

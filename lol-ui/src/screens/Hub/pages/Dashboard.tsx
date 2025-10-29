@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import "./dashboard.css";
-import type { Step1Payload } from "../../NewGame/Step1";
-import type { TeamCard } from "../../NewGame/Step3Team";
+import type { Step1Payload } from "../../Home/../NewGame/Step1";
+import type { TeamCard } from "../../Home/../NewGame/Step3Team";
+
+import { readDB } from "@/utils/saveIO";
+import NextMatchCard from "../../Home/components/NextMatchCard";
 
 type TeamExtra = {
   logo?: string; id?: string; sponsor?: string; budget?: number; payroll?: number;
@@ -20,7 +23,7 @@ type TableRow = { pos: number; name: string; pts: number; form: FormSeq };
 type RecentItem = { vs: string; res: FormRes | "—"; score: string };
 
 export default function Dashboard({
-  profile: _profile, // non utilisé ici
+  profile: _profile,
   league,
   team
 }: { profile: Step1Payload; league: "LCK"; team: TeamCard & TeamExtra }) {
@@ -42,34 +45,38 @@ export default function Dashboard({
     }));
   }, [team]);
 
-  // --------- IMPORTANT : plus de données fictives
-  // En attendant le moteur, on n’affiche rien si aucune donnée n’existe.
-  const table: TableRow[] = [];         // classement vide = "en attente"
-  const recent: RecentItem[] = [];      // aucun match disputé => message vide
+  const table: TableRow[] = [];
+  const recent: RecentItem[] = [];
 
   const spark = useMemo(() => {
-    const pts = Array.from({length: 24}, (_,i)=> Math.max(0, Math.sin(i/3)+i/8) ); // visuel only
+    const pts = Array.from({length: 24}, (_,i)=> Math.max(0, Math.sin(i/3)+i/8) );
     const w=360,h=160,p=10,max=Math.max(...pts,1),step=(w-p*2)/(pts.length-1||1);
     const path=pts.map((v,i)=>`${i?'L':'M'} ${p+i*step},${h-p-(v/max)*(h-p*2)}`).join(" ");
     const area=`${path} L ${w-p},${h-p} L ${p},${h-p} Z`;
     return {w,h,p,path,area};
   }, []);
 
+  // --- Prochaine rencontre branchée au calendrier (onglets)
+  const { db } = readDB();
+
+  // NextMatchCard envoie week déjà 0-based, day 0..6 -> ne PAS refaire -1
+  const openCalendarAt = (week0: number, day: number) => {
+    window.dispatchEvent(new CustomEvent("open-schedule", {
+      detail: { week: Math.max(0, week0), day: Math.max(0, Math.min(6, day)) }
+    }));
+  };
+
   return (
     <section className="dash">
       {/* Ligne 1 */}
       <div className="grid-3">
-        <div className="panel">
-          <div className="head"><h3>Prochaine rencontre</h3></div>
-          <div className="match">
-            <div className="logos">
-              <Badge name={teamName} logo={logo} />
-              <span className="vs">VS</span>
-              <Badge name="À définir" logo="/logos/lck/default.png" />
-            </div>
-            <div className="muted center">Semaine 1 • BO3 • {league}</div>
-          </div>
-        </div>
+        {/* Prochaine rencontre */}
+        <NextMatchCard
+          db={db}
+          teamId={team?.id}
+          onOpenCalendarAt={openCalendarAt}
+          // onPlayToday={...} // tu pourras brancher un handler si tu veux le bouton "Jouer"
+        />
 
         <div className="panel">
           <div className="head"><h3>Infos équipe</h3></div>
@@ -140,15 +147,8 @@ export default function Dashboard({
 
         <div className="panel">
           <div className="head"><h3>Calendrier (récemment)</h3><span className="link">Voir calendrier ›</span></div>
-          {recent.length === 0 ? (
-            <div className="muted">Aucun match disputé pour l’instant.</div>
-          ) : (
-            <ul className="fixtures">
-              {recent.map((m,i)=>(
-                <li key={i}><ResultDot r={m.res} /> <strong>{m.vs}</strong> <span className="muted">{m.score}</span></li>
-              ))}
-            </ul>
-          )}
+          {/* rien pour l’instant */}
+          <div className="muted">Aucun match disputé pour l’instant.</div>
         </div>
       </div>
     </section>
@@ -156,15 +156,8 @@ export default function Dashboard({
 }
 
 /* subcomponents */
-function Badge({ name, logo }:{ name:string; logo:string }) {
-  return <div className="badge"><img src={logo} alt={name}/><span>{name}</span></div>;
-}
 function FormDots({ seq }:{ seq: FormSeq }) {
   return <div className="form-dots">{seq.map((r,i)=><span key={i} className={`dot ${r==="W"?"w":r==="D"?"d":"l"}`} />)}</div>;
-}
-function ResultDot({ r }:{ r: FormRes | "—" }) {
-  if (r==="—") return <span className="res-dot next">•</span>;
-  return <span className={`res-dot ${r==="W"?"w":r==="D"?"d":"l"}`}>•</span>;
 }
 
 /* utils */

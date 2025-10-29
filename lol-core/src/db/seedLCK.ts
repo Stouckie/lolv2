@@ -1,57 +1,84 @@
-// NOTE: placé à la racine de src/ → imports en "./seeds" et "./lib"
-import type { GameDB, SaveFile, Team, Player, Meta, Week, StandingsRow } from "./models";
-import { LCK_TEAMS_SEED } from "./seeds/lckTeams";
-import { generateAllPlayers } from "./seeds/playersGen";
-import { generateLCKSplit } from "./lib/lckSchedule";
+﻿import type { GameDB, Team, Player, Meta, StandingsRow } from "../types";
+import { LCK_TEAMS_SEED } from "../seeds/lckTeams";
+import { generateAllPlayers } from "../seeds/playersGen";
+import { generateLCKSplit } from "../lib/lckSchedule";
 
-export function buildLckDB(seed: number): GameDB {
-  // 1) Équipes
-  const teams: Team[] = LCK_TEAMS_SEED.map(t => ({ ...t }));
+function buildLckDB(seed: number): GameDB {
+  const generatedAt = new Date().toISOString();
 
-  // 2) Joueurs
+  const teams: Team[] = LCK_TEAMS_SEED.map(team => ({ ...team }));
+
   const players: Player[] = generateAllPlayers(
-    teams.map(t => ({ id: t.id, rep: t.rep })),
+    teams.map(team => ({ id: team.id, rep: team.rep })),
     seed
   ) as unknown as Player[];
 
-  // 3) Masse salariale recalculée
-  const perTeamPayroll: Record<string, number> = {};
-  for (const t of teams) perTeamPayroll[t.id] = 0;
-  for (const p of players) perTeamPayroll[p.teamId] += p.wagePerDay;
-  for (const t of teams) t.payrollPerDay = Math.round(perTeamPayroll[t.id] ?? 0);
+  const payrollPerTeam: Record<string, number> = {};
+  for (const team of teams) payrollPerTeam[team.id] = 0;
+  for (const player of players) payrollPerTeam[player.teamId] = (payrollPerTeam[player.teamId] ?? 0) + player.wagePerDay;
+  for (const team of teams) team.payrollPerDay = Math.round(payrollPerTeam[team.id] ?? 0);
 
-  // 4) Calendrier
-  const schedule: Week[] = generateLCKSplit(teams.map(t => ({ id: t.id, name: t.name })));
+  const schedule = generateLCKSplit(teams.map(team => team.id));
 
-  // 5) Standings init (0-0)
   const teamIds = new Set<string>();
-  schedule.forEach(w => w.days.forEach(s => { teamIds.add(s.home); teamIds.add(s.away); }));
-  const standings: StandingsRow[] = [...teamIds].map(id => ({ teamId: id, wins: 0, losses: 0 }));
+  schedule.forEach(week => {
+    const series = week.days ?? week.series ?? [];
+    series.forEach(match => {
+      teamIds.add(match.home);
+      teamIds.add(match.away);
+    });
+  });
 
-  // 6) Meta
+  const standings: StandingsRow[] = Array.from(teamIds).map(teamId => ({
+    teamId,
+    wins: 0,
+    losses: 0,
+    gamesWon: 0,
+    gamesLost: 0,
+  }));
+
   const meta: Meta = {
     version: 1,
     league: "LCK",
-    season: "Spring 2025",
+    season: 1,
     timezone: "Asia/Seoul",
     currentWeek: 1,
+    currentDayIndex: 0,
     rngSeed: seed,
+    updatedAt: generatedAt,
   };
 
-  return { meta, teams, players, staff: [], schedule, standings, results: [] };
+  return {
+    meta,
+    teams,
+    players,
+    staff: [],
+    schedule,
+    standings,
+    results: [],
+  };
 }
 
 export function createNewGameSave(args: {
   managerName: string;
   league: "LCK";
   teamName: string;
-}): SaveFile<GameDB> {
+}): GameDB {
   const seed = Date.now();
   const db = buildLckDB(seed);
-  return {
-    version: 1,
-    savedAt: new Date().toISOString(),
-    summary: { manager: args.managerName, league: args.league, team: args.teamName, week: db.meta.currentWeek },
-    state: db,
+
+  db.meta.currentWeek = 1;
+  db.meta.currentDayIndex = 0;
+
+  // NEW — date de début de saison (KST)
+  db.meta.calendar = {
+    ...(db.meta.calendar ?? {}),
+    startISO: "2025-01-15T00:00:00+09:00",
+    timezone: "Asia/Seoul",
   };
+
+  db.meta.updatedAt = new Date().toISOString();
+  return db;
 }
+
+

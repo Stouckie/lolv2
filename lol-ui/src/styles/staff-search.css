@@ -1,0 +1,117 @@
+/* Layout général */
+.sr { padding: 20px; max-width: 1100px; margin: 0 auto; }
+.sr h1 { font-size: 28px; margin-bottom: 14px; }
+
+/* Filtres */
+.filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.input, .select {
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  border-radius: 10px;
+  min-width: 220px;
+  outline: none;
+}
+.select { min-width: 200px; }
+.range { display: flex; align-items: center; gap: 10px; color: #ddd; }
+.range input[type="range"] { width: 160px; }
+
+/* Grid de cartes responsive */
+.grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 900px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Carte */
+.card {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* Logo/avatar */
+.logo { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+.avatar {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,0.08);
+  color: #fff; font-weight: 700;
+}
+
+/* Texte */
+.toprow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.name { font-weight: 700; font-size: 16px; }
+.role { color: #c8d0ff; font-weight: 600; }
+.meta { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; color: #b6b6b6; font-size: 13px; }
+.dot { opacity: 0.35; }
+
+/* Badges */
+.pill { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.pill.free { background: rgba(255, 142, 142, 0.22); color: #ffb0b0; border: 1px solid rgba(255, 142, 142, 0.35); }
+.pill.team { background: rgba(180, 255, 210, 0.16); color: #baffd2; border: 1px solid rgba(180, 255, 210, 0.3); }
+
+/* Score */
+.right { display: flex; align-items: center; justify-content: flex-end; }
+.score {
+  min-width: 44px; height: 36px; padding: 0 10px;
+  border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #0d0d0f;
+  background: #f0f0f0;
+}
+.score.s2 { background: #d9ebff; }
+.score.s3 { background: #d6ffe6; }
+.score.s4 { background: #ffe8ba; }
+
+/* Empty */
+.empty { padding: 24px; text-align: center; color: #999; grid-column: 1 / -1; }
+/* Fix native <select> in dark theme */
+select, .select { color:#fff; background: rgba(255,255,255,0.06); }
+
+.select option,
+select option {
+  color:#111;            /* texte lisible sur fond blanc natif */
+  background:#fff;       /* force le fond des options */
+}
+
+.select option:checked,
+select option:checked {
+  color:#fff;
+  background:#3b82f6;    /* surbrillance */
+}
+
+/* (optionnel) certains navigateurs héritent line-height enorme */
+select, .select { line-height: normal; }
+/* Topbar */
+.sr-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sr-topbar h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Bouton Accueil */
+.btn-home {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-home:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-1px);
+  transition: 120ms ease;
+}
